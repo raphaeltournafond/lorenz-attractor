@@ -92,7 +92,7 @@ def affiche_diff_axes(rk4: tuple, euler: tuple):
     
     fig, axs = plt.subplots(3)
     
-    fig.suptitle('Ecart RK4 - Euler')
+    fig.suptitle('Ecarts par axe RK4 - Euler')
     
     range_pas =  range(I_PAS + 1)
     
