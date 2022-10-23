@@ -1,15 +1,16 @@
 import math
 import matplotlib.pyplot as plt
 
-SIGMA = 10
-BETA = 8/3
-RHO = 28
-ITERATION = 40
-PAS = 0.01
+SIGMA       = 10
+BETA        = 8/3
+RHO         = 28
+ITERATION   = 40
+PAS         = 0.01
+INIT_X      = 1.0
+INIT_Y      = 1.0
+INIT_Z      = 1.0
+
 I_PAS = math.floor(ITERATION / PAS)
-INIT_X = 1.0
-INIT_Y = 1.0
-INIT_Z = 1.0
 
 # Lorenz
 
@@ -40,8 +41,8 @@ def runge_kutta_4(x: float, y: float, z: float):
     
     return x1, y1, z1
         
-def lorenz_rk4(x0: float, y0: float, z0: float):
-    x, y, z = [x0], [y0], [z0]
+def lorenz_rk4():
+    x, y, z = [INIT_X], [INIT_Y], [INIT_Z]
     for i in range(0, I_PAS):
         xi_1, yi_1, zi_1 = runge_kutta_4(x[i], y[i], z[i])
         x.append(xi_1)
@@ -51,8 +52,8 @@ def lorenz_rk4(x0: float, y0: float, z0: float):
 
 # Euler
 
-def lorenz_euler(x0: float, y0: float, z0: float):
-    x, y, z = [x0], [y0], [z0]
+def lorenz_euler():
+    x, y, z = [INIT_X], [INIT_Y], [INIT_Z]
     for i in range(0, I_PAS):
         xi_1, yi_1, zi_1 = lorenz(x[i], y[i], z[i])
         x.append(x[i] + xi_1 * PAS)
@@ -62,31 +63,61 @@ def lorenz_euler(x0: float, y0: float, z0: float):
 
 # Graph
 
-def affiche_graphs(rk4, euler):
+def affiche_rk4_euler(rk4: tuple, euler: tuple):
     # Unpack
     x_rk4, y_rk4, z_rk4 = rk4
     x_euler, y_euler, z_euler = euler
     
-    fig=plt.figure()
+    fig = plt.figure()
     
-    ax=fig.gca(projection='3d')
+    ax = fig.gca(projection='3d')
     
-    ax.plot(x_rk4, y_rk4, z_rk4, 'r', linewidth=0.2) # RK4
-    ax.plot(x_euler, y_euler, z_euler, 'b', linewidth=0.2) # Euler
+    ax.plot(x_rk4, y_rk4, z_rk4, 'r', linewidth = 0.5) # RK4
+    ax.plot(x_euler, y_euler, z_euler, 'b', linewidth = 0.5) # Euler
     
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.set_zlabel('z')
+    plt.legend(["RK4","Euler"])
     
-    plt.title("Modélisation de l'équation de Lorenz")
+    plt.title('Attracteur de Lorenz : x0 = ' + str(INIT_X) + ', y0 = ' + str(INIT_Y) + ', z0 = ' + str(INIT_Z))
     
     plt.draw()
     plt.show()
     
+def affiche_diff_axes(rk4: tuple, euler: tuple):
+    # Unpack
+    x_rk4, y_rk4, z_rk4 = rk4
+    x_euler, y_euler, z_euler = euler
+    
+    fig, axs = plt.subplots(3)
+    
+    fig.suptitle('Ecart RK4 - Euler')
+    
+    range_pas =  range(I_PAS + 1)
+    
+    axs[0].plot(range_pas, x_rk4, 'r', linewidth=0.5)
+    axs[0].plot(range_pas, x_euler, 'b', linewidth=0.5)
+    axs[1].plot(range_pas, y_rk4, 'r', linewidth=0.5)
+    axs[1].plot(range_pas, y_euler, 'b', linewidth=0.5)
+    axs[2].plot(range_pas, z_rk4, 'r', linewidth=0.5)
+    axs[2].plot(range_pas, z_euler, 'b', linewidth=0.5)
+    
+    axs[0].legend(["x rk4", "x euler"])
+    axs[1].legend(["y rk4", "y euler"])
+    axs[2].legend(["z rk4", "z euler"])
+    
+    plt.draw()
+    plt.show()
+
+def affiche_graphs(rk4: tuple, euler: tuple):
+    affiche_rk4_euler(rk4, euler)
+    affiche_diff_axes(rk4, euler)
+    
 # Main
 
-rk4 = lorenz_rk4(INIT_X, INIT_Y, INIT_Z)
+rk4 = lorenz_rk4()
 
-euler = lorenz_euler(INIT_X, INIT_Y, INIT_Z)
+euler = lorenz_euler()
 
 affiche_graphs(rk4, euler)
