@@ -149,7 +149,7 @@ def rafraichirGraphes(root: Tk, x: Scale, y: Scale, z: Scale, i: Scale):
     rk4 = lorenz_rk4()
     euler = lorenz_euler()
     
-    fig_lorenz, fig_axes = genere_graphs(rk4, euler)
+    genere_graphs(rk4, euler)
     
     lorenz_canvas.get_tk_widget().destroy()
     lorenz_canvas = FigureCanvasTkAgg(fig_lorenz, root)
@@ -210,7 +210,7 @@ def main():
     b = Button(controles, text = 'Rafraichir', bg = 'cyan', command =lambda: rafraichirGraphes(root, x, y, z, i))
     b.pack()
     
-    s = Button(controles, text = 'Sauvegarder', bg = 'green', command =lambda: sauvegarde())
+    s = Button(controles, text = 'Sauvegarder', bg = 'magenta', command =lambda: sauvegarde())
     s.pack(side = tk.RIGHT)
     
     
