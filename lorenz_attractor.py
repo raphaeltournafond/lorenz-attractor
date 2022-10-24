@@ -5,13 +5,15 @@ import math # floor
 
 # plots
 import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
-from matplotlib.axes import Axes
+import matplotlib.figure as Figure
 
 # GUI
 import tkinter as tk
 from tkinter import *
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+# Misc
+import os
 
 
 # Constants
@@ -77,6 +79,9 @@ def lorenz_euler():
 
 # Graphes
 
+fig_lorenz: Figure
+fig_axes: Figure
+
 def genere_rk4_euler(rk4: tuple, euler: tuple):
     # Unpack
     x_rk4, y_rk4, z_rk4 = rk4
@@ -96,7 +101,7 @@ def genere_rk4_euler(rk4: tuple, euler: tuple):
     
     plt.title('Attracteur de Lorenz : x0 = ' + str(x_init) + ', y0 = ' + str(y_init) + ', z0 = ' + str(z_init))
     
-    return fig, ax
+    return fig
     
 def genere_diff_axes(rk4: tuple, euler: tuple):
     # Unpack
@@ -120,13 +125,13 @@ def genere_diff_axes(rk4: tuple, euler: tuple):
     axs[1].legend(["y rk4", "y euler"])
     axs[2].legend(["z rk4", "z euler"])
     
-    return fig, axs
+    return fig
 
 def genere_graphs(rk4: tuple, euler: tuple):
+    global fig_lorenz, fig_axes
+    
     fig_lorenz = genere_rk4_euler(rk4, euler)
     fig_axes = genere_diff_axes(rk4, euler)
-    
-    return fig_lorenz, fig_axes
     
 # GUI - main
 
@@ -144,22 +149,39 @@ def rafraichirGraphes(root: Tk, x: Scale, y: Scale, z: Scale, i: Scale):
     rk4 = lorenz_rk4()
     euler = lorenz_euler()
     
-    t_lorenz, t_axes = genere_graphs(rk4, euler)
+    fig_lorenz, fig_axes = genere_graphs(rk4, euler)
     
     lorenz_canvas.get_tk_widget().destroy()
-    lorenz_canvas = FigureCanvasTkAgg(t_lorenz[0], root)
+    lorenz_canvas = FigureCanvasTkAgg(fig_lorenz, root)
     lorenz_canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH)
     lorenz_canvas.draw()
     
     axes_canvas.get_tk_widget().destroy()
-    axes_canvas = FigureCanvasTkAgg(t_axes[0], root)
+    axes_canvas = FigureCanvasTkAgg(fig_axes, root)
     axes_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand = 1)
     axes_canvas.draw()
     
+# Sauvegarde
+
+def creer_dossier_images():
+    #python program to check if a directory exists
+    path = "./images"
+    # Check whether the specified path exists or not
+    isExist = os.path.exists(path)
+    if not isExist:
+        # Create a new directory because it does not exist
+        os.makedirs(path)
+        
+def sauvegarde():
+    global fig_lorenz, fig_axes
     
+    creer_dossier_images()
+    
+    fig_lorenz.savefig('./images/attracteur.png')
+    fig_axes.savefig('./images/ecarts.png')
 
 def main():
-    global lorenz_canvas, axes_canvas
+    global lorenz_canvas, axes_canvas, fig_lorenz, fig_axes
     
     root = tk.Tk()
     
@@ -185,8 +207,12 @@ def main():
     
     # Bouton
     
-    b = Button(controles, text = 'Rafraichir', bg = 'cyan',command =lambda: rafraichirGraphes(root, x, y, z, i))
+    b = Button(controles, text = 'Rafraichir', bg = 'cyan', command =lambda: rafraichirGraphes(root, x, y, z, i))
     b.pack()
+    
+    s = Button(controles, text = 'Sauvegarder', bg = 'green', command =lambda: sauvegarde())
+    s.pack(side = tk.RIGHT)
+    
     
     controles.pack(side = tk.BOTTOM, padx=20, pady=20)
     
@@ -195,11 +221,7 @@ def main():
     rk4 = lorenz_rk4()
     euler = lorenz_euler()
     
-    t_lorenz, t_axes = genere_graphs(rk4, euler)
-    
-    # Unpack
-    fig_lorenz, _ = t_lorenz
-    fig_axes, _ = t_axes
+    genere_graphs(rk4, euler)
     
     lorenz_canvas = FigureCanvasTkAgg(fig_lorenz, root)
     lorenz_canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH)
