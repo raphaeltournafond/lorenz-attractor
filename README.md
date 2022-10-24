@@ -19,10 +19,20 @@ INIT_Z      = 1.0
 
 2. Lancer le script
 
-3. Visualiser l'attracteur avec les méthodes RK4 et Euler
+3. Utiliser le gui
+
+![GUI](images/GUI.PNG)
+
+a. Modifier la position initiale
+
+b. Rafraichir la vue avec le bouton raifraichir
+
+c. Sauvegarder les graphes avec le bouton sauvegarder
+
+4. Visualiser l'attracteur avec les méthodes RK4 et Euler
 
 ![Attracteur RK4 et Euler](images/attracteur.png)
 
-4. Visualiser la différence par axe entre RK4 et Euler
+5. Visualiser la différence par axe entre RK4 et Euler
 
 ![Différence RK4 et Euler](images/ecarts.png)
