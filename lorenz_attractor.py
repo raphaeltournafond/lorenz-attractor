@@ -17,38 +17,38 @@ import os
 
 # Constants
 
-SIGMA       = 10
-BETA        = 8/3
-RHO         = 28
-PAS         = 0.01
+sigma       = 10
+beta        = 8/3
+rho         = 23
+pas         = 0.01
 
 iteration = 40
-x_init = 1.0
-y_init = 1.0
-z_init = 1.0
-i_pas = math.floor(iteration / PAS)
+x_init = 0
+y_init = 0.1
+z_init = 0
+i_pas = math.floor(iteration / pas)
 
 # Lorenz
 
 def lorenz(x: float, y: float, z: float):
-    return  SIGMA * (y - x), x * (RHO - z) - y, x * y - BETA * z
+    return  sigma * (y - x), x * (rho - z) - y, x * y - beta * z
     
 # RK4
 
 def derniere_etape_rk4(v: float, k1: float, k2: float, k3: float, k4: float):
-    return v + (k1 + 2 * k2 + 2 * k3 + k4) * (PAS / 6)
+    return v + (k1 + 2 * k2 + 2 * k3 + k4) * (pas / 6)
     
 def runge_kutta_4(x: float, y: float, z: float):
     "Formule RK4 pour trouver le prochain point"
     k1x, k1y, k1z = lorenz(x, y, z)
     
-    P_2 = PAS / 2
+    P_2 = pas / 2
     
     k2x, k2y, k2z = lorenz(x + k1x * P_2, y + k1y * P_2, z + k1z * P_2)
     
     k3x, k3y, k3z = lorenz(x + k2x * P_2, y + k2y * P_2, z + k2z * P_2)
     
-    k4x, k4y, k4z = lorenz(x + PAS * k3x, y + PAS * k3y, z + PAS * k3z)
+    k4x, k4y, k4z = lorenz(x + pas * k3x, y + pas * k3y, z + pas * k3z)
     
     x1 = derniere_etape_rk4(x, k1x, k2x, k3x, k4x)
     y1 = derniere_etape_rk4(y, k1y, k2y, k3y, k4y)
@@ -71,9 +71,9 @@ def lorenz_euler():
     x, y, z = [x_init], [y_init], [z_init]
     for i in range(0, i_pas):
         xi_1, yi_1, zi_1 = lorenz(x[i], y[i], z[i])
-        x.append(x[i] + xi_1 * PAS)
-        y.append(y[i] + yi_1 * PAS)
-        z.append(z[i] + zi_1 * PAS)
+        x.append(x[i] + xi_1 * pas)
+        y.append(y[i] + yi_1 * pas)
+        z.append(z[i] + zi_1 * pas)
     return x, y, z
 
 # Graphes
@@ -98,7 +98,13 @@ def genere_rk4_euler(rk4: tuple, euler: tuple):
     ax.set_zlabel('z')
     plt.legend(["RK4","Euler"])
     
-    plt.title('Attracteur de Lorenz : x0 = ' + str(x_init) + ', y0 = ' + str(y_init) + ', z0 = ' + str(z_init))
+    plt.title('Attracteur de Lorenz :x0 = '
+              + str(x_init)
+              + ', y0 = ' + str(y_init)
+              + ', z0 = ' + str(z_init)
+              + '\nsigma = ' + str(sigma)
+              + ', beta = ' + str(beta)
+              + ', rho = ' + str(rho))
     
     return fig
     
@@ -137,13 +143,17 @@ def genere_graphs(rk4: tuple, euler: tuple):
 lorenz_canvas: FigureCanvasTkAgg
 axes_canvas: FigureCanvasTkAgg
 
-def rafraichirGraphes(root: Tk, x: Scale, y: Scale, z: Scale, i: Scale):
-    global x_init, y_init, z_init, iteration, i_pas, lorenz_canvas, axes_canvas
+def rafraichirGraphes(root: Tk, s: Scale, b: Scale, r:Scale, x: Scale, y: Scale, z: Scale, i: Scale, p: Scale):
+    global sigma, beta, rho, x_init, y_init, z_init, iteration, pas, i_pas, lorenz_canvas, axes_canvas
+    sigma = s.get()
+    beta = b.get()
+    rho = r.get()
     x_init = x.get()
     y_init = y.get()
     z_init = z.get()
     iteration = i.get()
-    i_pas = i_pas = math.floor(iteration / PAS)
+    pas = p.get()
+    i_pas = math.floor(iteration / pas)
     
     rk4 = lorenz_rk4()
     euler = lorenz_euler()
@@ -188,29 +198,49 @@ def main():
     
     # Scales
     
-    x = Scale(controles, label = 'x initial', from_ = 0.0, to = 2.0, resolution = 0.01 , length = 600, orient = HORIZONTAL)
+    scales = Frame(controles)
+    
+    x = Scale(scales, label = 'x initial', from_ = -200.0, to = 200.0, resolution = 0.1, length = 600, orient = HORIZONTAL)
     x.set(x_init)
     x.pack()
     
-    y = Scale(controles, label = 'y initial', from_ = 0.0, to = 2.0, resolution = 0.01 , length = 600, orient = HORIZONTAL)
+    y = Scale(scales, label = 'y initial', from_ = -200.0, to = 200.0, resolution = 0.1, length = 600, orient = HORIZONTAL)
     y.set(y_init)
     y.pack()
     
-    z = Scale(controles, label = 'z initial', from_ = 0.0, to = 2.0, resolution = 0.01 , length = 600, orient = HORIZONTAL)
+    z = Scale(scales, label = 'z initial', from_ = -200.0, to = 200.0, resolution = 0.1, length = 600, orient = HORIZONTAL)
     z.set(z_init)
     z.pack()
     
-    i = Scale(controles, label = 'Iterations (pas = 0.01)', from_ = 1, to = 100, resolution = 1 , length = 600, orient = HORIZONTAL)
+    i = Scale(scales, label = 'Iterations', from_ = 1, to = 1000, resolution = 1 , length = 600, orient = HORIZONTAL)
     i.set(iteration)
     i.pack()
     
-    # Bouton
+    s = Scale(scales, label = 'Sigma', from_ = 0, to = 50, resolution = 1.0, length = 600, orient = HORIZONTAL)
+    s.set(sigma)
+    s.pack()
     
-    b = Button(controles, text = 'Rafraichir', bg = 'cyan', command =lambda: rafraichirGraphes(root, x, y, z, i))
+    b = Scale(scales, label = 'Beta', from_ = 0, to = 10, resolution = 0.0001, length = 600, orient = HORIZONTAL)
+    b.set(beta)
     b.pack()
     
-    s = Button(controles, text = 'Sauvegarder', bg = 'magenta', command =lambda: sauvegarde())
-    s.pack(side = tk.RIGHT)
+    r = Scale(scales, label = 'Rho', from_ = 0, to = 100, resolution = 1.0, length = 600, orient = HORIZONTAL)
+    r.set(rho)
+    r.pack()
+    
+    p = Scale(scales, label = 'Pas', from_ = 0.01, to = 0.0001, resolution =  0.0001, length = 600, orient = HORIZONTAL)
+    p.set(pas)
+    p.pack()
+    
+    scales.pack(side = tk.TOP)
+    
+    # Bouton
+    
+    refresh = Button(controles, text = 'Rafraichir', bg = 'cyan', command =lambda: rafraichirGraphes(root, s, b, r, x, y, z, i, p))
+    refresh.pack()
+    
+    save = Button(controles, text = 'Sauvegarder', bg = 'magenta', command =lambda: sauvegarde())
+    save.pack(side = tk.RIGHT)
     
     
     controles.pack(side = tk.BOTTOM, padx=20, pady=20)
